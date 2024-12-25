@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Environmental Data Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Real-Time Environmental Data Dashboard</h1>
+        </header>
+
+        <section class="graphs-container">
+            <div class="graph">
+                <h3>PM2.5 Levels</h3>
+                <canvas id="pm25-chart"></canvas>
+            </div>
+            <div class="graph">
+                <h3>PM10 Levels</h3>
+                <canvas id="pm10-chart"></canvas>
+            </div>
+            <div class="graph">
+                <h3>Ozone Levels</h3>
+                <canvas id="ozone-chart"></canvas>
+            </div>
+            <div class="graph">
+                <h3>Humidity Levels</h3>
+                <canvas id="humidity-chart"></canvas>
+            </div>
+            <div class="graph">
+                <h3>Temperature Levels</h3>
+                <canvas id="temperature-chart"></canvas>
+            </div>
+            <div class="graph">
+                <h3>CO Levels</h3>
+                <canvas id="co-chart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const generateHourlyData = () => {
+            const now = new Date();
+            const labels = [];
+            const values = {
+                pm25: [],
+                pm10: [],
+                ozone: [],
+                humidity: [],
+                temperature: [],
+                co: [],
+            };
+
+            for (let i = 2; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+                labels.push(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                values.pm25.push((Math.random() * 50).toFixed(2));
+                values.pm10.push((Math.random() * 80).toFixed(2));
+                values.ozone.push((Math.random() * 100).toFixed(2));
+                values.humidity.push((Math.random() * 100).toFixed(2));
+                values.temperature.push((Math.random() * 40).toFixed(2));
+                values.co.push((Math.random() * 10).toFixed(2));
+            }
+
+            return { labels, ...values };
+        };
+
+        const updateChart = (chart, values, labels) => {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        };
+
+        const initializeChart = (canvasId, label) => {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: label,
+                        data: [],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 3,
+                            },
+                        },
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+        };
+
+        const pm25Chart = initializeChart('pm25-chart', 'PM2.5 Levels');
+        const pm10Chart = initializeChart('pm10-chart', 'PM10 Levels');
+        const ozoneChart = initializeChart('ozone-chart', 'Ozone Levels');
+        const humidityChart = initializeChart('humidity-chart', 'Humidity Levels');
+        const temperatureChart = initializeChart('temperature-chart', 'Temperature Levels');
+        const coChart = initializeChart('co-chart', 'CO Levels');
+
+        const updateCharts = () => {
+            const data = generateHourlyData();
+
+            updateChart(pm25Chart, data.pm25, data.labels);
+            updateChart(pm10Chart, data.pm10, data.labels);
+            updateChart(ozoneChart, data.ozone, data.labels);
+            updateChart(humidityChart, data.humidity, data.labels);
+            updateChart(temperatureChart, data.temperature, data.labels);
+            updateChart(coChart, data.co, data.labels);
+        };
+
+        window.onload = () => {
+            updateCharts();
+            setInterval(updateCharts, 60 * 60 * 1000);
+        };
+    </script>
+</body>
+</html>
